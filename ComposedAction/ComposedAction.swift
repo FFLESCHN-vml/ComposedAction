@@ -24,7 +24,13 @@ class Composed {
         }
     }
 
-    func execute() {
+    func execute(_ finalHandler: Completion? = nil) {
+        if let finalHandler = finalHandler {
+            let finalAction: Action = { val, _ in
+                finalHandler(val)
+            }
+            self.actions.insert(finalAction, at: 0)
+        }
         actionCompletion(nil)
     }
 

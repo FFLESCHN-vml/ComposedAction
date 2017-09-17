@@ -15,7 +15,7 @@ class ComposedActionTests: XCTestCase {
             add(-3),
             printValue,
             captureValue(expect, captured)
-        ).execute()
+            ).execute()
 
         waitForExpectations(timeout: 0.5) { error in
             XCTAssertNil(error)
@@ -35,7 +35,7 @@ class ComposedActionTests: XCTestCase {
             subtractAction,
             printValue,
             captureValue(expect, captured)
-        ).execute()
+            ).execute()
 
         waitForExpectations(timeout: 0.5) { error in
             XCTAssertNil(error)
@@ -52,7 +52,7 @@ class ComposedActionTests: XCTestCase {
             add(25),
             generateError,
             captureValue(expect, captured)
-        )
+            )
             .stopOnError { _ in expect.fulfill() }
             .execute()
 
@@ -70,7 +70,7 @@ class ComposedActionTests: XCTestCase {
             add(25),
             generateError,
             captureValue(expect, captured)
-        ).execute()
+            ).execute()
 
         waitForExpectations(timeout: 0.5) { error in
             XCTAssertNotNil(captured.value)
@@ -78,6 +78,23 @@ class ComposedActionTests: XCTestCase {
         }
     }
 
+    func test_runs_final_handler() {
+        let expect = self.expectation(description: "finalAction on execute")
+        let captured = Captured<Int>()
+
+        Composed(
+            add(5),
+            add(10)
+            ).execute {
+                captured.value = $0 as? Int
+                expect.fulfill()
+        }
+
+        waitForExpectations(timeout: 0.5) { error in
+            XCTAssertNil(error)
+            XCTAssertEqual(captured.value, 15)
+        }
+    }
 
     // Actions
     func add(_ num: Int) -> Composed.Action {
