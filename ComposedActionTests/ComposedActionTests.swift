@@ -96,6 +96,25 @@ class ComposedActionTests: XCTestCase {
         }
     }
 
+    func test_composed_access_retrieve_external_variable() {
+        let expect = self.expectation(description: "composed access")
+        let captured = Captured<Int>()
+
+        let startingVal = 11
+
+        Composed(
+            Composed.Access(startingVal),
+            add(9),
+            captureValue(expect, captured)
+        ).execute()
+
+        waitForExpectations(timeout: 0.5) { error in
+            XCTAssertNil(error)
+            XCTAssertEqual(captured.value, 20)
+        }
+    }
+
+
     // Actions
     func add(_ num: Int) -> Composed.Action {
         return { value, completion in

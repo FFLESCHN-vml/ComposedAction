@@ -52,3 +52,12 @@ class Composed {
         nextAction(value, actionCompletion)
     }
 }
+
+
+// MARK: - Convenient Actions
+extension Composed {
+
+    static func Access(_ something: Any?) -> Composed.Action {
+        return { _, completion in  completion(something) }
+    }
+}
