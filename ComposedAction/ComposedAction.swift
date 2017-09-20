@@ -7,12 +7,26 @@ class Composed {
     typealias Completion = (Any?)->()
     typealias ErrorHandler = (Error?)->()
 
-    private var actions: [Action] = []
-    private var errorHandler: ErrorHandler?
+    fileprivate var actions: [Action] = []
+    fileprivate var errorHandler: ErrorHandler?
 
     init(_ actions: Action...) {
         self.actions = actions.reversed()
     }
+
+    class Error: Swift.Error, CustomStringConvertible, CustomDebugStringConvertible {
+        let code: Int
+        let text: String
+        var description: String { return "Composed.Error" }
+        var debugDescription: String { return "\(self) [\(code)]: \(text)" }
+        init(code: Int, text: String) { self.code = code; self.text = text }
+        convenience init() { self.init(code: -1, text: "Undefined Error") }
+    }
+}
+
+
+// MARK: - General Operation
+extension Composed {
 
     func action() -> Action {
         return { incomingVal, finalCompletion in
@@ -45,8 +59,7 @@ class Composed {
     private func actionCompletion(_ value: Any?) {
         if let errorHandler = self.errorHandler,
             let value = value as? Error {
-            errorHandler(value)
-            return
+            return errorHandler(value)
         }
         guard let nextAction = actions.popLast() else { return }
         nextAction(value, actionCompletion)

@@ -7,19 +7,21 @@ class ComposedActionTests: XCTestCase {
 
     func test_execute_simple_action_chain() {
         let expect = self.expectation(description: "simple captured value")
-        let captured = Captured<Int>()
+        let captured = Captured<String>()
 
         Composed(
-            add(1),
-            add(2),
-            add(-3),
+            cat("dub-dub"),
+            uppercase(),
+            prefix("-lubba-"),
+            prefix("wubba"),
+            cat("!"),
             printValue,
             captureValue(expect, captured)
-            ).execute()
+        ).execute()
 
         waitForExpectations(timeout: 0.5) { error in
             XCTAssertNil(error)
-            XCTAssertEqual(captured.value, 0)
+            XCTAssertEqual(captured.value, "wubba-lubba-DUB-DUB!")
         }
     }
 
@@ -27,15 +29,15 @@ class ComposedActionTests: XCTestCase {
         let expect = self.expectation(description: "compound captured value")
         let captured = Captured<Int>()
 
-        let subtractAction = Composed(add(-5), add(-2)).action()
+        let totalup10 = Composed(add(6), add(4)).action()
+        let subtract7 = Composed(add(-5), add(-2)).action()
 
         Composed(
-            add(6),
-            add(4),
-            subtractAction,
+            totalup10,
+            subtract7,
             printValue,
             captureValue(expect, captured)
-            ).execute()
+        ).execute()
 
         waitForExpectations(timeout: 0.5) { error in
             XCTAssertNil(error)
@@ -52,7 +54,7 @@ class ComposedActionTests: XCTestCase {
             add(25),
             generateError,
             captureValue(expect, captured)
-            )
+        )
             .stopOnError { _ in expect.fulfill() }
             .execute()
 
@@ -70,7 +72,7 @@ class ComposedActionTests: XCTestCase {
             add(25),
             generateError,
             captureValue(expect, captured)
-            ).execute()
+        ).execute()
 
         waitForExpectations(timeout: 0.5) { error in
             XCTAssertNotNil(captured.value)
@@ -85,32 +87,14 @@ class ComposedActionTests: XCTestCase {
         Composed(
             add(5),
             add(10)
-            ).execute {
-                captured.value = $0 as? Int
-                expect.fulfill()
+        ).execute {
+            captured.value = $0 as? Int
+            expect.fulfill()
         }
 
         waitForExpectations(timeout: 0.5) { error in
             XCTAssertNil(error)
             XCTAssertEqual(captured.value, 15)
-        }
-    }
-
-    func test_composed_access_retrieve_external_variable() {
-        let expect = self.expectation(description: "composed access")
-        let captured = Captured<Int>()
-
-        let startingVal = 11
-
-        Composed(
-            Composed.Access(startingVal),
-            add(9),
-            captureValue(expect, captured)
-        ).execute()
-
-        waitForExpectations(timeout: 0.5) { error in
-            XCTAssertNil(error)
-            XCTAssertEqual(captured.value, 20)
         }
     }
 
@@ -125,25 +109,47 @@ class ComposedActionTests: XCTestCase {
         }
     }
 
+    func cat(_ text: String) -> Composed.Action {
+        return { value, completion in
+            let value = (value as? String ?? "") + text
+            completion(value)
+        }
+    }
+
+    func prefix(_ text: String) -> Composed.Action {
+        return { value, completion in
+            let value = text + (value as? String ?? "")
+            completion(value)
+        }
+    }
+
+    func uppercase() -> Composed.Action {
+        return { value, completion in
+            completion((value as? String ?? "").uppercased())
+        }
+    }
+
     var printValue: Composed.Action = { value, completion in
         DispatchQueue.global(qos: .background).async {
             guard let value = value else { return }
-            print("Value: \(value)")
+            print("\n--------\n\(value)\n--------\n")
             completion(value)
         }
     }
 
     func captureValue<T>(_ expectation: XCTestExpectation, _ captured: Captured<T>) -> Composed.Action {
         return { value, completion in
-            captured.value = value as? T
-            expectation.fulfill()
-            completion(value)
+            DispatchQueue.global(qos: .background).async {
+                captured.value = value as? T
+                expectation.fulfill()
+                completion(value)
+            }
         }
     }
 
     var generateError: Composed.Action = { value, completion in
         DispatchQueue.global(qos: .background).async {
-            completion(NSError(domain: "error.intentional", code: 127, userInfo: nil))
+            completion(Composed.Error())
         }
     }
 }

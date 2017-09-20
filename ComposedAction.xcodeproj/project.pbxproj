@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		DC2D6F081F6B915400C1E410 /* ComposedActionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC2D6F071F6B915400C1E410 /* ComposedActionTests.swift */; };
 		DC2D6F131F6B930A00C1E410 /* ComposedAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC2D6F121F6B930A00C1E410 /* ComposedAction.swift */; };
+		DCCD30321F72BE6A00CCBFAE /* ComposedAccessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCD30301F72BE6A00CCBFAE /* ComposedAccessTests.swift */; };
+		DCCD30331F72BE6A00CCBFAE /* ComposedErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCD30311F72BE6A00CCBFAE /* ComposedErrorTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -16,6 +18,8 @@
 		DC2D6F071F6B915400C1E410 /* ComposedActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposedActionTests.swift; sourceTree = "<group>"; };
 		DC2D6F091F6B915400C1E410 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DC2D6F121F6B930A00C1E410 /* ComposedAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComposedAction.swift; sourceTree = "<group>"; };
+		DCCD30301F72BE6A00CCBFAE /* ComposedAccessTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComposedAccessTests.swift; sourceTree = "<group>"; };
+		DCCD30311F72BE6A00CCBFAE /* ComposedErrorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComposedErrorTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +62,8 @@
 			isa = PBXGroup;
 			children = (
 				DC2D6F071F6B915400C1E410 /* ComposedActionTests.swift */,
+				DCCD30301F72BE6A00CCBFAE /* ComposedAccessTests.swift */,
+				DCCD30311F72BE6A00CCBFAE /* ComposedErrorTests.swift */,
 				DC2D6F091F6B915400C1E410 /* Info.plist */,
 			);
 			path = ComposedActionTests;
@@ -132,7 +138,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DCCD30321F72BE6A00CCBFAE /* ComposedAccessTests.swift in Sources */,
 				DC2D6F081F6B915400C1E410 /* ComposedActionTests.swift in Sources */,
+				DCCD30331F72BE6A00CCBFAE /* ComposedErrorTests.swift in Sources */,
 				DC2D6F131F6B930A00C1E410 /* ComposedAction.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
