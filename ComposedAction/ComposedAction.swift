@@ -5,7 +5,7 @@ class Composed {
 
     typealias Action = (Any?, @escaping Completion)->()
     typealias Completion = (Any?)->()
-    typealias ErrorHandler = (Error?)->()
+    typealias ErrorHandler = (Swift.Error?)->()
 
     fileprivate var actions: [Action] = []
     fileprivate var errorHandler: ErrorHandler?
@@ -58,7 +58,7 @@ extension Composed {
 
     private func actionCompletion(_ value: Any?) {
         if let errorHandler = self.errorHandler,
-            let value = value as? Error {
+            let value = value as? Swift.Error {
             return errorHandler(value)
         }
         guard let nextAction = actions.popLast() else { return }

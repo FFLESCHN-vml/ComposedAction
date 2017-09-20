@@ -149,7 +149,7 @@ class ComposedActionTests: XCTestCase {
 
     var generateError: Composed.Action = { value, completion in
         DispatchQueue.global(qos: .background).async {
-            completion(Composed.Error())
+            completion(NSError(domain: "error.intentional", code: 127, userInfo: nil))
         }
     }
 }
