@@ -9,7 +9,6 @@ class Composed {
 
     fileprivate var actions: [ActionItem] = []
     fileprivate var errorHandler: ErrorHandler?
-    fileprivate var shouldRemoveFinalHandler: Bool = false
 
     init(_ actions: ActionItem...) {
         self.actions = actions
@@ -85,7 +84,6 @@ fileprivate extension Composed {
         if let finalHandler = finalHandler { finalAction = .action({ val, _ in finalHandler(val) }) }
         else { finalAction = .action({ $1($0) }) }
         self.actions.append(finalAction)
-        shouldRemoveFinalHandler = true
     }
 
     func actionCompletion(_ value: Any?) {
