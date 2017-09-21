@@ -27,19 +27,20 @@ class ComposedActionTests: XCTestCase {
         let expect = self.expectation(description: "compound captured value")
         let captured = Captured<Int>()
 
-        let totalup10 = Composed(.action(add(6)), .action(add(4))).action
-        let subtract7 = Composed(.action(add(-5)), .action(add(-2))).action
+        let totalup10 = Composed(.action(add(6)), .action(add(4)))
+        let subtract7 = Composed(.action(add(-5)), .action(add(-2)))
 
         Composed(
-            .action(totalup10),
-            .action(subtract7),
+            .action(totalup10.action),
+            .action(totalup10.action),
+            .action(subtract7.action),
             .action(printValue),
             .action(captureValue(expect, captured))
         ).execute()
 
         waitForExpectations(timeout: 0.5) { error in
             XCTAssertNil(error)
-            XCTAssertEqual(captured.value, 3)
+            XCTAssertEqual(captured.value, 13)
         }
     }
 
@@ -136,6 +137,28 @@ class ComposedActionTests: XCTestCase {
 
         waitForExpectations(timeout: 0.5) { error in
             XCTAssertEqual(finalResult, 25)
+        }
+    }
+
+    func test_is_reusable() {
+        let expect = self.expectation(description: "reusable")
+        var finalResult: Int = 0
+
+        let composed = Composed(
+            .action(add(5)),
+            .action(multiply(5))
+        )
+
+        composed.execute {
+            finalResult += $0 as! Int
+            composed.execute {
+                finalResult += $0 as! Int
+                expect.fulfill()
+            }
+        }
+
+        waitForExpectations(timeout: 0.5) { error in
+            XCTAssertEqual(finalResult, 50)
         }
     }
 }

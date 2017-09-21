@@ -51,15 +51,17 @@ class Composed {
 extension Composed {
 
     var action: Action {
+        let copy = Composed(actions: actions)
         return { initialVal, finalCompletion in
-            self.appendFinalHandlerForAction(finalCompletion)
-            self.actionCompletion(initialVal)
+            copy.appendFinalHandlerForAction(finalCompletion)
+            copy.actionCompletion(initialVal)
         }
     }
 
     func execute(_ finalHandler: Completion? = nil) {
-        appendFinalHandlerForExecution(finalHandler)
-        actionCompletion(nil)
+        let copy = Composed(actions: actions)
+        copy.appendFinalHandlerForExecution(finalHandler)
+        copy.actionCompletion(nil)
     }
 
     func stopOnError(_ handler: ErrorHandler? = nil) -> Composed {
