@@ -3,7 +3,6 @@ import XCTest
 
 class ComposedActionTests: XCTestCase {
 
-
     func test_execute_simple_action_chain() {
         let expect = self.expectation(description: "simple captured value")
         let captured = Captured<String>()
@@ -41,6 +40,31 @@ class ComposedActionTests: XCTestCase {
         waitForExpectations(timeout: 0.5) { error in
             XCTAssertNil(error)
             XCTAssertEqual(captured.value, 3)
+        }
+    }
+
+    func test_execute_sub_actions_accept_current_value_but_pass_original_value_forward() {
+        let expect = self.expectation(description: "outer actions")
+        let subexpect = self.expectation(description: "sub action")
+        let subcapture = Captured<Int>()
+        let startingVal = 555
+        var finalResult: Int = 0
+
+        Composed(
+            .access(startingVal),
+            .action(add(-55)),
+            .sub([
+                .action(add(-100)),
+                .action(captureValue(subexpect, subcapture))
+                ])
+            ).execute {
+                finalResult = $0 as! Int
+                expect.fulfill()
+        }
+
+        waitForExpectations(timeout: 0.5) { error in
+            XCTAssertEqual(subcapture.value, 400)
+            XCTAssertEqual(finalResult, 500)
         }
     }
 

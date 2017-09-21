@@ -7,20 +7,32 @@ class Composed {
     typealias Completion = (Any?)->()
     typealias ErrorHandler = (Swift.Error?)->()
 
-    fileprivate var actions: [ActionWrapper] = []
+    fileprivate var actions: [ActionItem] = []
     fileprivate var errorHandler: ErrorHandler?
+    fileprivate var shouldRemoveFinalHandler: Bool = false
 
-    init(_ actions: ActionWrapper...) {
-        self.actions = actions.reversed()
+    init(_ actions: ActionItem...) {
+        self.actions = actions
     }
 
-    enum ActionWrapper {
+    init(actions: [ActionItem]) {
+        self.actions = actions
+    }
+
+    enum ActionItem {
         case action(Action)
-        case access(Any)
+        case access(Any?)
+        case sub([ActionItem])
         var closure: Action {
             switch (self) {
-            case let .action(closure):   return closure
-            case let .access(something): return { _, completion in  completion(something) }
+            case let .action(closure):      return closure
+            case let .access(something):    return { _, completion in  completion(something) }
+            case let .sub(actions):
+                return { val, completion in
+                    var actions = actions
+                    actions.insert((.access(val)), at: 0)
+                    Composed(actions: actions).execute { _ in completion(val) }
+                }
             }
         }
     }
@@ -40,18 +52,14 @@ class Composed {
 extension Composed {
 
     var action: Action {
-        return { incomingVal, finalCompletion in
-            let finalAction: ActionWrapper = .action({ val, _ in finalCompletion(val) })
-            self.actions.insert(finalAction, at: 0)
-            self.actionCompletion(incomingVal)
+        return { initialVal, finalCompletion in
+            self.appendFinalHandlerForAction(finalCompletion)
+            self.actionCompletion(initialVal)
         }
     }
 
     func execute(_ finalHandler: Completion? = nil) {
-        if let finalHandler = finalHandler {
-            let finalAction: ActionWrapper = .action({ val, _ in finalHandler(val) })
-            self.actions.insert(finalAction, at: 0)
-        }
+        appendFinalHandlerForExecution(finalHandler)
         actionCompletion(nil)
     }
 
@@ -62,13 +70,35 @@ extension Composed {
         }
         return self
     }
+}
 
-    private func actionCompletion(_ value: Any?) {
+
+// MARK: -
+fileprivate extension Composed {
+    func appendFinalHandlerForAction(_ finalCompletion: @escaping Completion) {
+        let finalAction: ActionItem = .action({ val,_ in finalCompletion(val) })
+        self.actions.append(finalAction)
+    }
+
+    func appendFinalHandlerForExecution(_ finalHandler: Completion?) {
+        let finalAction: ActionItem
+        if let finalHandler = finalHandler { finalAction = .action({ val, _ in finalHandler(val) }) }
+        else { finalAction = .action({ $1($0) }) }
+        self.actions.append(finalAction)
+        shouldRemoveFinalHandler = true
+    }
+
+    func actionCompletion(_ value: Any?) {
         if let errorHandler = self.errorHandler,
             let value = value as? Swift.Error {
             return errorHandler(value)
         }
-        guard let nextAction = actions.popLast() else { return }
+        guard let nextAction = getNextAction() else { return }
         nextAction.closure(value, actionCompletion)
+    }
+
+    func getNextAction() -> ActionItem? {
+        guard !(actions .isEmpty) else { return nil }
+        return actions.removeFirst()
     }
 }
