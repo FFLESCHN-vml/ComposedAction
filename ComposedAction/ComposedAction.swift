@@ -7,11 +7,22 @@ class Composed {
     typealias Completion = (Any?)->()
     typealias ErrorHandler = (Swift.Error?)->()
 
-    fileprivate var actions: [Action] = []
+    fileprivate var actions: [ActionWrapper] = []
     fileprivate var errorHandler: ErrorHandler?
 
-    init(_ actions: Action...) {
+    init(_ actions: ActionWrapper...) {
         self.actions = actions.reversed()
+    }
+
+    enum ActionWrapper {
+        case action(Action)
+        case access(Any)
+        var closure: Action {
+            switch (self) {
+            case let .action(closure):   return closure
+            case let .access(something): return { _, completion in  completion(something) }
+            }
+        }
     }
 
     class Error: Swift.Error, CustomStringConvertible, CustomDebugStringConvertible {
@@ -30,9 +41,7 @@ extension Composed {
 
     func action() -> Action {
         return { incomingVal, finalCompletion in
-            let finalAction: Action = { val, _ in
-                finalCompletion(val)
-            }
+            let finalAction: ActionWrapper = .action({ val, _ in finalCompletion(val) })
             self.actions.insert(finalAction, at: 0)
             self.actionCompletion(incomingVal)
         }
@@ -40,9 +49,7 @@ extension Composed {
 
     func execute(_ finalHandler: Completion? = nil) {
         if let finalHandler = finalHandler {
-            let finalAction: Action = { val, _ in
-                finalHandler(val)
-            }
+            let finalAction: ActionWrapper = .action({ val, _ in finalHandler(val) })
             self.actions.insert(finalAction, at: 0)
         }
         actionCompletion(nil)
@@ -62,15 +69,6 @@ extension Composed {
             return errorHandler(value)
         }
         guard let nextAction = actions.popLast() else { return }
-        nextAction(value, actionCompletion)
-    }
-}
-
-
-// MARK: - Convenient Actions
-extension Composed {
-
-    static func Access(_ something: Any?) -> Composed.Action {
-        return { _, completion in  completion(something) }
+        nextAction.closure(value, actionCompletion)
     }
 }
