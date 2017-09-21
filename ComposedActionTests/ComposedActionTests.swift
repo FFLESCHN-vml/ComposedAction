@@ -28,8 +28,8 @@ class ComposedActionTests: XCTestCase {
         let expect = self.expectation(description: "compound captured value")
         let captured = Captured<Int>()
 
-        let totalup10 = Composed(.action(add(6)), .action(add(4))).action()
-        let subtract7 = Composed(.action(add(-5)), .action(add(-2))).action()
+        let totalup10 = Composed(.action(add(6)), .action(add(4))).action
+        let subtract7 = Composed(.action(add(-5)), .action(add(-2))).action
 
         Composed(
             .action(totalup10),

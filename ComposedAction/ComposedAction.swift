@@ -39,7 +39,7 @@ class Composed {
 // MARK: - General Operation
 extension Composed {
 
-    func action() -> Action {
+    var action: Action {
         return { incomingVal, finalCompletion in
             let finalAction: ActionWrapper = .action({ val, _ in finalCompletion(val) })
             self.actions.insert(finalAction, at: 0)
