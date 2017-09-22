@@ -13,7 +13,7 @@ func captureValue<T>(_ expectation: XCTestExpectation, _ captured: Captured<T>) 
     }
 }
 
-func add(_ num: Int) -> Composed.Action {
+func addition(_ num: Int) -> Composed.Action {
     return { value, completion in
         DispatchQueue.global(qos: .background).async {
             let value = (value as? Int ?? 0) + num

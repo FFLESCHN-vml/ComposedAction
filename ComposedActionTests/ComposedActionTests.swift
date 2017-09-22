@@ -27,8 +27,8 @@ class ComposedActionTests: XCTestCase {
         let expect = self.expectation(description: "compound captured value")
         let captured = Captured<Int>()
 
-        let totalup10 = Composed(.action(add(6)), .action(add(4)))
-        let subtract7 = Composed(.action(add(-5)), .action(add(-2)))
+        let totalup10 = Composed(.action(addition(6)), .action(addition(4)))
+        let subtract7 = Composed(.action(addition(-5)), .action(addition(-2)))
 
         Composed(
             .action(totalup10.action),
@@ -53,9 +53,9 @@ class ComposedActionTests: XCTestCase {
 
         Composed(
             .access(startingVal),
-            .action(add(-55)),
+            .action(addition(-55)),
             .sub([
-                .action(add(-100)),
+                .action(addition(-100)),
                 .action(captureValue(subexpect, subcapture))
                 ])
             ).execute {
@@ -74,8 +74,8 @@ class ComposedActionTests: XCTestCase {
         let captured = Captured<Int>()
 
         Composed(
-            .action(add(25)),
-            .action(add(25)),
+            .action(addition(25)),
+            .action(addition(25)),
             .action(generateError),
             .action(captureValue(expect, captured))
         )
@@ -92,8 +92,8 @@ class ComposedActionTests: XCTestCase {
         let captured = Captured<Any>()
 
         Composed(
-            .action(add(25)),
-            .action(add(25)),
+            .action(addition(25)),
+            .action(addition(25)),
             .action(generateError),
             .action(captureValue(expect, captured))
         ).execute()
@@ -109,8 +109,8 @@ class ComposedActionTests: XCTestCase {
         let captured = Captured<Int>()
 
         Composed(
-            .action(add(5)),
-            .action(add(10))
+            .action(addition(5)),
+            .action(addition(10))
         ).execute {
             captured.value = $0 as? Int
             expect.fulfill()
@@ -145,7 +145,7 @@ class ComposedActionTests: XCTestCase {
         var finalResult: Int = 0
 
         let composed = Composed(
-            .action(add(5)),
+            .action(addition(5)),
             .action(multiply(5))
         )
 
